@@ -7,6 +7,7 @@
     // connect to MongoHQ assuming your MONGOHQ_URL environment
     // variable contains the connection string
     $connection_url = getenv("MONGOHQ_URL");
+    echo $connection_url
 
     // create the mongo connection object
     $m = new Mongo($connection_url);
@@ -17,6 +18,8 @@
 
     // use the database we connected to
     $db = $m->selectDB($db_name);
+    //get GridFS
+    $grid = $db->getGridFS();
 
     echo "<h2>Collections</h2>";
     echo "<ul>";
