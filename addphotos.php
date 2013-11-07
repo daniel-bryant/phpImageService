@@ -61,6 +61,6 @@ for($i=0; $i<count($_FILES['upload']['name']); $i++) {
 
 //http_redirect('http://sheltered-brook-1332.herokuapp.com/album/' . $albumId);
 
-?> 
+?>
  </body>
 </html>
