@@ -1,66 +1,60 @@
+<!-- PHP Mongo Docs: http://php.net/manual/en/class.mongodb.php -->
 <html>
- <head>
-  <title>Add Photos</title>
- </head>
- <body>
+<body>
+<h1>MongoHQ Test</h1>
 <?php
-// parts taken from - http://stackoverflow.com/questions/2704314/multiple-file-upload-in-php/2704321
-// usage - <input name="upload[]" type="file" multiple="multiple" />
-// Requirements
-// MongoDB
-// *PECL mongo
-// *PECL pecl_http
-// ImageMagick <libmagickwand-dev imagemagick>
-// *PECL imagick
+  try {
+    // connect to MongoHQ assuming your MONGOHQ_URL environment
+    // variable contains the connection string
+    $connection_url = getenv("MONGOHQ_URL");
 
-echo '<p>here</p>'
-try
-{
-  echo '<p>at try</p>'
-  $connection_url = getenv("MONGOHQ_URL");
+    // create the mongo connection object
+    $m = new Mongo($connection_url);
 
-  $m = new Mongo($connection_url);
+    // extract the DB name from the connection path
+    $url = parse_url($connection_url);
+    $db_name = preg_replace('/\/(.*)/', '$1', $url['path']);
 
-  $url = parse_url($connection_url);
-  $db_name = preg_replace('/\/(.*)/', '$1', $url['path']);
+    // use the database we connected to
+    $db = $m->selectDB($db_name);
 
-  $db = $m->selectDB($db_name);
-  $grid = $db->getGridFS();
+    echo "<h2>Collections</h2>";
+    echo "<ul>";
 
-  echo '<p>end try</p>'
-}
-catch ( MongoConnectionException $e )
-{
-  echo '<p>Couldn\'t connect to mongodb, is the "mongo" process running?</p>';
-  exit();
-}
+    // print out list of collections
+    $cursor = $db->listCollections();
+    $collection_name = "";
+    foreach( $cursor as $doc ) {
+      echo "<li>" . $doc->getName() . "</li>";
+      $collection_name = $doc->getName();
+    }
+    echo "</ul>";
 
-echo '<p>here again</p>'
+    // print out last collection
+    if ( $collection_name != "" ) {
+      $collection = $db->selectCollection($collection_name);
+      echo "<h2>Documents in ${collection_name}</h2>";
 
-$albumId = $_POST['albumId'];
-echo '<p>albumId ' . $albumId . '</p>';
-//Loop through each file
-for($i=0; $i<count($_FILES['upload']['name']); $i++) {
+      // only print out the first 5 docs
+      $cursor = $collection->find();
+      $cursor->limit(5);
+      echo $cursor->count() . ' document(s) found. <br/>';
+      foreach( $cursor as $doc ) {
+        echo "<pre>";
+        var_dump($doc);
+        echo "</pre>";
+      }
+    }
 
-  //Get the temp file path
-  $tmpFilePath = $_FILES['upload']['tmp_name'][$i];
-  //Make sure we have a filepath
-  if ($tmpFilePath != ""){
-    //Store into gridfs photos
-    $imageId = $grid->storeFile($tmpFilePath);
-    echo '<p>imageId ' . $imageId . '</p>';
-    $grid->remove(array("_id" => $id));
-
-    //$thumb = new Imagick($tmpFilePath);
-    //$thumb->cropThumbnailImage(150, 150);
-    //$thumbId = $grid->storeBytes($thumb->getImageBlob());
-
-    //$response = http_post_fields('http://sheltered-brook-1332.herokuapp.com/album/' . $albumId . '/' . $imageId . '/' . $thumbId, array());
+    // disconnect from server
+    $m->close();
+  } catch ( MongoConnectionException $e ) {
+    die('Error connecting to MongoDB server');
+  } catch ( MongoException $e ) {
+    die('Mongo Error: ' . $e->getMessage());
+  } catch ( Exception $e ) {
+    die('Error: ' . $e->getMessage());
   }
-}
-
-//http_redirect('http://sheltered-brook-1332.herokuapp.com/album/' . $albumId);
-
 ?>
- </body>
-</html>
+</body>
+</html> 
