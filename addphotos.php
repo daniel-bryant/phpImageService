@@ -7,14 +7,14 @@
     // connect to MongoHQ assuming your MONGOHQ_URL environment
     // variable contains the connection string
     $connection_url = getenv("MONGOHQ_URL");
-
+    echo "<p>here</p>";
     // create the mongo connection object
     $m = new Mongo($connection_url);
-
+    echo "<p>here 2</p>";
     // extract the DB name from the connection path
     $url = parse_url($connection_url);
     $db_name = preg_replace('/\/(.*)/', '$1', $url['path']);
-
+    echo "<p>here 3</p>";
     // use the database we connected to
     $db = $m->selectDB($db_name);
     //get GridFS
