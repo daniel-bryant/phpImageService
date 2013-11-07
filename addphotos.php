@@ -13,8 +13,10 @@
 // ImageMagick <libmagickwand-dev imagemagick>
 // *PECL imagick
 
+echo '<p>here</p>'
 try
 {
+  echo '<p>at try</p>'
   $connection_url = getenv("MONGOHQ_URL");
 
   $m = new Mongo($connection_url);
@@ -25,6 +27,7 @@ try
   $db = $m->selectDB($db_name);
   $grid = $db->getGridFS();
 
+  echo '<p>end try</p>'
 }
 catch ( MongoConnectionException $e )
 {
@@ -32,8 +35,10 @@ catch ( MongoConnectionException $e )
   exit();
 }
 
-$albumId = $_POST['albumId'];
+echo '<p>here again</p>'
 
+$albumId = $_POST['albumId'];
+echo '<p>albumId ' . $albumId . '</p>';
 //Loop through each file
 for($i=0; $i<count($_FILES['upload']['name']); $i++) {
 
@@ -43,16 +48,18 @@ for($i=0; $i<count($_FILES['upload']['name']); $i++) {
   if ($tmpFilePath != ""){
     //Store into gridfs photos
     $imageId = $grid->storeFile($tmpFilePath);
+    echo '<p>imageId ' . $imageId . '</p>';
+    $grid->remove(array("_id" => $id));
 
-    $thumb = new Imagick($tmpFilePath);
-    $thumb->cropThumbnailImage(150, 150);
-    $thumbId = $grid->storeBytes($thumb->getImageBlob());
+    //$thumb = new Imagick($tmpFilePath);
+    //$thumb->cropThumbnailImage(150, 150);
+    //$thumbId = $grid->storeBytes($thumb->getImageBlob());
 
-    $response = http_post_fields('http://sheltered-brook-1332.herokuapp.com/album/' . $albumId . '/' . $imageId . '/' . $thumbId, array());
+    //$response = http_post_fields('http://sheltered-brook-1332.herokuapp.com/album/' . $albumId . '/' . $imageId . '/' . $thumbId, array());
   }
 }
 
-http_redirect('http://sheltered-brook-1332.herokuapp.com/album/' . $albumId);
+//http_redirect('http://sheltered-brook-1332.herokuapp.com/album/' . $albumId);
 
 ?> 
  </body>
