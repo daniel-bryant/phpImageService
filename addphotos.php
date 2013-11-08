@@ -20,7 +20,21 @@
     //get GridFS
     $grid = $db->getGridFS();
 
+    $albumId = $_POST['albumId'];
+    echo '<p>albumId ' . $albumId . '</p>';
+    //Loop through each file
+    for($i=0; $i<count($_FILES['upload']['name']); $i++) {
+      //Get the temp file path
+      $tmpFilePath = $_FILES['upload']['tmp_name'][$i];
 
+      //Make sure we have a filepath
+      if ($tmpFilePath != "") {
+        //Store into gridfs photos
+        $imageId = $grid->storeFile($tmpFilePath);
+        echo '<p>imageId ' . $imageId . '</p>';
+        $grid->remove(array("_id" => $id));
+      }
+    }
 
     // disconnect from server
     $m->close();
