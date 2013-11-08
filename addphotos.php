@@ -32,7 +32,13 @@
         //Store into gridfs photos
         $imageId = $grid->storeFile($tmpFilePath);
         echo '<p>imageId ' . $imageId . '</p>';
-        $grid->remove(array("_id" => $id));
+        $grid->remove(array("_id" => $imageId));
+
+        $thumb = new Imagick($tmpFilePath);
+        $thumb->cropThumbnailImage(150, 150);
+        $thumbId = $grid->storeBytes($thumb->getImageBlob());
+        echo '<p>thumbId ' . $thumbId . '</p>';
+        $grid->remove(array("_id" => $thumbId));
       }
     }
 
